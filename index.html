@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salawat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400..700&display=swap" rel="stylesheet">
+</head>
+<style>
+body{
+margin: 0;
+padding: 0;
+font-family: "Reem Kufi", sans-serif;
+background-color: #A9D9D0;
+color: #F2E7DC;
+}
+header{
+    width: 100%;
+    position: static;
+    background-color: #038C7F;
+    text-align: center;
+    padding: 0.3em;
+    margin-bottom: 1em;
+    
+}
+h1{
+
+}
+.upper-info{
+    min-width: fit-content;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 2em;
+}
+#choose-city{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    min-width: fit-content;
+    width: 40%;
+
+
+}
+#choose-city label{
+ font-size: 1.8em;
+ color: #027373;
+ font-weight: 800;
+}
+#choose-city select{
+    background-color: #2b3230;
+    color: #027373;
+    padding: 2%;
+    width: 50%;
+    border-radius: 10px;
+    font-size: 1.3em;
+
+
+}
+#chose-date{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    min-width: fit-content;
+    width: 40%;
+}
+#chose-date label{
+ font-size: 1.8em;
+ color: #027373;
+ font-weight: 800;
+}
+
+#chose-date input{
+    font-size: 1.3em;
+    background-color: #F2E7DC;
+    padding: 2.5%;
+    height: 15%;
+    border-radius: 3px;
+}
+main{
+display: flex;
+justify-content: space-around;
+align-items: center;
+flex-direction: column;
+}
+#prays{
+    background-color: black;
+    width: 80%;
+    text-align: center;
+    align-items: start;
+    margin: 0;
+    padding: 0;
+}
+#pray{
+    background-color: #027373;
+    margin: 0;
+    padding: 0;
+}
+
+</style>
+<body>
+    <header>
+        <h1>مواقيت الصلاة</h1>
+    </header>
+    <main>
+        <div class="upper-info">
+            <div id="choose-city">
+                <label>اختر مدينتك</label>
+                 <select id="select-city" >
+
+                </select>
+            </div>
+            <div id="chose-date">
+                <label>تاريخ اليوم</label>
+                <label id="dat">1446/09/13</label>
+            </div>
+        </div>
+              
+        <div id="prays">
+            <div>
+                <div id="pray">
+                    <h2>الفجر</h2>
+                    <h3 id="fajr-time">00:00</h3>
+                </div>
+                <div  id="pray">
+                    <h2>الشروق</h2>
+                    <h3 id="shrouq-time">00:00</h3>
+                </div>
+                <div id="pray">
+                    <h2>الظهر</h2>
+                    <h3 id="dhouhor-time">00:00</h3>
+                </div>
+            </div>
+            <div>
+                <div id="pray">
+                    <h2>العصر</h2>
+                    <h3 id="aser-time">00:00</h3>
+                </div>
+                <div id="pray">
+                    <h2>المغرب</h2>
+                    <h3 id="maghreb-time">00:00</h3>
+                </div>
+                <div id="pray">
+                    <h2>العشاء</h2>
+                    <h3 id="isha-time">00:00</h3>
+                </div>
+    
+            </div>
+                   </div>
+
+
+    </main>
+    <script src="./node_modules/axios/dist/axios.min.js"></script> 
+
+    <script>
+        let cities = [
+            {
+                name:"Al Madinah al Munawwarah",
+                arabicName:"المدينة"
+            },
+            {
+                name:"Ar Riyad",
+                arabicName:"الرياض"
+            },            {
+                name:"Makkah al Mukarramah",
+                arabicName:"مكة"
+            },
+        ]
+        for(let city of cities){
+            const content = `
+            <option>${city.arabicName}</option>
+            `
+            document.getElementById("select-city").innerHTML+=content
+        }
+
+        document.getElementById("select-city").addEventListener("change",function(){
+            let cityName = ""
+            for(let city of cities){
+                if (city.arabicName == this.value) {
+                    cityName = city.name
+                }
+                getPrayerTimesOfCity(cityName)
+            }
+
+        })
+    function getPrayerTimesOfCity(cityName) {
+        let params = {
+            country: "SA",
+            city: cityName 
+    }
+    axios.get('https://api.aladhan.com/v1/timingsByCity', {
+        params:params
+      })
+      .then(function (response) {
+        const Timings =response.data.data.timings
+        fillTimeForPrayer("fajr-time",Timings.Fajr)
+        fillTimeForPrayer("shrouq-time",Timings.Sunrise)
+        fillTimeForPrayer("dhouhor-time",Timings.Dhuhr)
+        fillTimeForPrayer("aser-time",Timings.Asr)
+        fillTimeForPrayer("maghreb-time",Timings.Maghrib)
+        fillTimeForPrayer("isha-time",Timings.Isha)
+        const readbleDate = response.data.data.date.hijri.date
+        const weekDay = response.data.data.date.hijri.weekday.ar
+        let dat = weekDay +" "+readbleDate  
+        document.getElementById("dat").innerHTML =dat
+        
+      })
+      .catch(function (error) {
+        console.log(error);
+      })
+    }
+    getPrayerTimesOfCity("Al Madinah al Munawwarah") //default time
+    
+    
+    function fillTimeForPrayer(id,time){
+        document.getElementById(id).innerHTML = time
+      }
+    </script>
+</body>
+</html>
